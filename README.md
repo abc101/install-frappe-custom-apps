@@ -1,4 +1,4 @@
-### Docker Setup for Frappe with ERPNext, HRMS, and Payments [version-15]
+### Docker Setup for Frappe with ERPNext, HRMS, and Payments [version-15] without Traefik
 
 Use this script to deploy **Frappe** and its associated applications (**ERPNext, HRMS, Payments**) to your Docker environment. The installation pulls pre-packaged Git dependencies from the container registry: ghcr.io/abc101/frappe-custom-apps.
 
