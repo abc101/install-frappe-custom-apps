@@ -33,4 +33,4 @@ If you want to build a custom Docker image with your own app versions, use the f
 ./docker-builder-frappe-apps.sh
 ```
 
-and then set `CUSTOM_IMAGE` with your docker image repository in your `user.env` for `install=frappe-apps.sh`.
+and then set `CUSTOM_IMAGE` with your docker image repository in your `user.env` for `install-frappe-apps.sh`.
