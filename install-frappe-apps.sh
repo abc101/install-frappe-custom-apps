@@ -145,7 +145,7 @@ wait_service() {
   local svc="$1"; local i=0
   while [ $i -lt $ATTEMPTS ]; do
     state=$(docker compose --project-name "$BENCH" -f "$HOME/gitops/$BENCH.yaml" ps --format json \
-      | jq -r ".[] | select(.Service==\"$svc\") | .State" | head -n1)
+      | jq -s -r "if (.[0] | type) == \"array\" then .[0][] else .[] end | select(.Service==\"$svc\") | .State" | head -n1)
     if [ "$state" = "running" ] || [ "$state" = "healthy" ]; then return 0; fi
     i=$((i+1)); sleep "$SLEEP_SECS"
   done; return 1
