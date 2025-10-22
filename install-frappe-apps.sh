@@ -18,7 +18,7 @@ if [ -f "$SCRIPT_DIR/user.env" ]; then
   . "$SCRIPT_DIR/user.env"
   set +o allexport
 else
-  echo "➡️  No user environmnet file found. System is going to use default settings."
+  echo "➡️  No user environment file found. System is going to use default settings."
 fi
 
 # Read apps.json from the same directory as the script and generate base64 string
