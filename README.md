@@ -1,3 +1,10 @@
+![status](https://img.shields.io/badge/Status-Development-orange?style=for-the-badge&logo=github)
+
+> ⚠️ **Warning — Development Version**
+>
+> This branch is currently under active development and has not yet been fully tested.  
+> Please use this version **only for testing and feedback** until it’s merged into `main`.
+
 ### 🐳 Docker Setup for Frappe Apps (Without Traefik)
 
 Use this script to deploy **Frappe (without Traefik)** along with its associated applications — **ERPNext**, **HRMS**, and **Payments** — in your Docker environment.
