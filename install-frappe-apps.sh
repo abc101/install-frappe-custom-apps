@@ -9,13 +9,39 @@ set -euo pipefail
 # ===========================
 
 # ----- User configuration -----
-# Load user.env from the same folder as this script (if present).
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ -f "$SCRIPT_DIR/user.env" ]; then
-  echo "ℹ️  Loading user configuration from $SCRIPT_DIR/user.env"
-  set -o allexport
-  . "$SCRIPT_DIR/user.env"
-  set +o allexport
+USER_ENV_FILE="$SCRIPT_DIR/user.env"
+
+if [ -f "$USER_ENV_FILE" ]; then
+  echo "⚙️  Detected existing user configuration: $USER_ENV_FILE"
+  echo
+
+  # Ask user what to do
+  if [ -z "${SKIP_CONFIRM:-}" ]; then
+    echo "The installer found a user.env file with your saved environment variables."
+    echo "Do you want to:"
+    echo "  [U] Use this configuration to continue installation  <-- DEFAULT"
+    echo "  [D] Discard and reinstall using default settings"
+    echo "  [C] Cancel installation"
+    read -r -p "Choose [U/D/C] (press Enter for U): " _choice
+    case "$_choice" in
+      [Dd]) USE_DEFAULT="yes" ;;
+      [Cc]) echo "🛑 Installation cancelled."; exit 0 ;;
+      *)    USE_DEFAULT="no" ;; # default
+    esac
+  else
+    USE_DEFAULT="no" # skip confirm => auto use user.env
+  fi
+
+  if [ "$USE_DEFAULT" = "no" ]; then
+    echo "ℹ️  Loading user configuration from $USER_ENV_FILE"
+    set -o allexport
+    . "$USER_ENV_FILE"
+    set +o allexport
+  else
+    echo "➡️  Ignoring existing user.env — proceeding with default settings."
+  fi
+
 else
   echo "➡️  No user environment file found. System will use default settings."
 fi
