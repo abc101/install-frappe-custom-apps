@@ -18,7 +18,8 @@ if [ -f "$SCRIPT_DIR/user.env" ]; then
   . "$SCRIPT_DIR/user.env"
   set +o allexport
 else
-  echo "➡️  No user environment file found. System is going to use default settings."
+  echo "➡️  No user environment file found."
+  exit 0
 fi
 
 # Read apps.json from the same directory as the script and generate base64 string
@@ -67,17 +68,17 @@ fi
 
 # Fail fast if no tag could be determined
 if [ -z "${IMAGE_TAG:-}" ]; then
-  echo "❌ Could not determine ERPNext image tag (FRAPPE_ERPNEXT_VERSION not set and no tag found in pwd.yml)."
-  echo "   Aborting install-frappe-apps.sh."
+  echo "❌  Could not determine ERPNext image tag (FRAPPE_ERPNEXT_VERSION not set and no tag found in pwd.yml)."
+  echo "    Aborting install-frappe-apps.sh."
   exit 1
 fi
 
 # Check if GHCR image exists
 REQUIRED_IMAGE="${CUSTOM_IMAGE}:${IMAGE_TAG}"
-echo "🔎 Checking required image: ${REQUIRED_IMAGE}"
+echo "🔎  Checking required image: ${REQUIRED_IMAGE}"
 if ! docker manifest inspect "${REQUIRED_IMAGE}" >/dev/null 2>&1; then
-  echo "❌ Required image not found in GHCR: ${REQUIRED_IMAGE}"
-  echo "   Make sure docker-builder.sh pushed this tag, then rerun install-frappe-apps.sh."
+  echo "❌  Required image not found in GHCR: ${REQUIRED_IMAGE}"
+  echo "    Make sure docker-builder.sh pushed this tag, then rerun install-frappe-apps.sh."
   exit 1
 fi
 
@@ -131,10 +132,10 @@ if ! command -v jq >/dev/null 2>&1; then
   elif command -v apk >/dev/null 2>&1; then
     sudo apk add --no-cache jq
   else
-    echo "❌ Package manager not supported. Please install jq manually."
+    echo "❌  Package manager not supported. Please install jq manually."
     exit 1
   fi
-  echo "✅ jq installed successfully: $(jq --version)"
+  echo "✅  jq installed successfully: $(jq --version)"
 fi
 
 # Wait for services to become healthy
