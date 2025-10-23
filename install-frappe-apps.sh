@@ -8,43 +8,98 @@ set -euo pipefail
 # - IMAGE_TAG must match frappe_docker/pwd.yml tag
 # ===========================
 
-# ----- User configuration -----
+# ----- User configuration (with interactive handling for present/absent user.env) -----
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 USER_ENV_FILE="$SCRIPT_DIR/user.env"
+USER_ENV_EXAMPLE="$SCRIPT_DIR/example.env"
+
+create_user_env_from_template() {
+  # Create user.env either from example or a minimal default skeleton
+  if [ -f "$USER_ENV_EXAMPLE" ]; then
+    cp -f "$USER_ENV_EXAMPLE" "$USER_ENV_FILE"
+  else
+    cat > "$USER_ENV_FILE" <<'ENV'
+# --- user.env (generated) ---
+# Fill these values as needed. Defaults are safe for local/dev.
+EMAIL=erp@example.com
+DB_PASSWORD=ChangeMe123!
+ERPNEXT_PASSWORD=ChangeMe123!
+BENCH=erp
+SITES=erp.example.com
+FRONT_HTTP_PORT=8080
+# Optional registry image for pre-packaged apps (change owner if needed)
+CUSTOM_IMAGE=ghcr.io/abc101/frappe-custom-apps
+# Optional installer behavior flags:
+# INSTALL_MODE=upgrade      # or fresh
+# FORCE_UPGRADE=no          # yes to force redeploy even if versions equal
+# SKIP_CONFIRM=yes          # skip interactive prompts
+ENV
+  fi
+  echo "Created $USER_ENV_FILE (edit it before running again if needed)."
+}
 
 if [ -f "$USER_ENV_FILE" ]; then
-  echo "⚙️  Detected existing user configuration: $USER_ENV_FILE"
-  echo
-
-  # Ask user what to do
+  echo "Detected existing user configuration: $USER_ENV_FILE"
   if [ -z "${SKIP_CONFIRM:-}" ]; then
     echo "The installer found a user.env file with your saved environment variables."
-    echo "Do you want to:"
+    echo "What do you want to do?"
     echo "  [U] Use this configuration to continue installation  <-- DEFAULT"
-    echo "  [D] Discard and reinstall using default settings"
+    echo "  [D] Discard and proceed with built-in defaults (do NOT load user.env)"
     echo "  [C] Cancel installation"
     read -r -p "Choose [U/D/C] (press Enter for U): " _choice
     case "$_choice" in
       [Dd]) USE_DEFAULT="yes" ;;
-      [Cc]) echo "🛑 Installation cancelled."; exit 0 ;;
-      *)    USE_DEFAULT="no" ;; # default
+      [Cc]) echo "Installation cancelled."; exit 0 ;;
+      *)    USE_DEFAULT="no"  ;; # default = use user.env
     esac
   else
-    USE_DEFAULT="no" # skip confirm => auto use user.env
+    # Non-interactive: default to using user.env unless caller explicitly sets USE_DEFAULT=yes
+    : "${USE_DEFAULT:=no}"
   fi
 
   if [ "$USE_DEFAULT" = "no" ]; then
-    echo "ℹ️  Loading user configuration from $USER_ENV_FILE"
+    echo "Loading user configuration from $USER_ENV_FILE"
     set -o allexport
+    # shellcheck source=/dev/null
     . "$USER_ENV_FILE"
     set +o allexport
   else
-    echo "➡️  Ignoring existing user.env — proceeding with default settings."
+    echo "Ignoring existing user.env — using built-in defaults."
   fi
 
 else
-  echo "➡️  No user environment file found. System will use default settings."
+  echo "No user.env found at $USER_ENV_FILE."
+  if [ -z "${SKIP_CONFIRM:-}" ]; then
+    echo "How would you like to proceed?"
+    echo "  [D] Proceed with built-in defaults (no user.env)  <-- DEFAULT"
+    echo "  [G] Generate a new user.env (from template) and then exit"
+    echo "  [C] Cancel installation"
+    read -r -p "Choose [D/G/C] (press Enter for D): " _choice2
+    case "$_choice2" in
+      [Gg])
+        create_user_env_from_template
+        exit 0
+        ;;
+      [Cc])
+        echo "Installation cancelled."
+        exit 0
+        ;;
+      *)
+        echo "Proceeding with built-in defaults (you can create user.env later)."
+        ;;
+    esac
+  else
+    # Non-interactive behavior when user.env is absent:
+    # NEW_USER_ENV=create -> generate and exit; otherwise proceed with defaults.
+    if [ "${NEW_USER_ENV:-}" = "create" ]; then
+      create_user_env_from_template
+      exit 0
+    else
+      echo "Proceeding with built-in defaults (SKIP_CONFIRM set, no user.env)."
+    fi
+  fi
 fi
+
 
 # Read apps.json (same directory) and encode to base64
 export APPS_JSON_BASE64="$(base64 -w 0 "${SCRIPT_DIR}/apps.json")"

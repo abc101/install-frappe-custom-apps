@@ -32,6 +32,44 @@ This installation automatically pulls pre-packaged Git dependencies from the con
 
 ---
 
+### ⚙️ User Configuration (`user.env`)
+
+When running `install-frappe-apps.sh`, the installer now detects whether a `user.env` configuration file exists in the same directory as the script.
+
+#### 📁 If `user.env` exists:
+You will be prompted to choose one of the following options:
+
+| Option | Action |
+|---------|---------|
+| **U** (Default) | Use the existing `user.env` configuration for installation. |
+| **D** | Discard `user.env` and proceed with built-in default settings. |
+| **C** | Cancel installation. |
+
+#### 📄 If `user.env` does **not** exist:
+The installer offers you the following choices:
+
+| Option | Action |
+|---------|---------|
+| **D** (Default) | Continue with built-in defaults (no `user.env` loaded). |
+| **G** | Generate a new `user.env` template and exit, so you can edit it before re-running the script. |
+| **C** | Cancel installation. |
+
+#### ⚙️ Non-interactive usage
+For automated or CI environments, you can control this behavior using environment variables:
+
+| Variable | Description | Example |
+|-----------|--------------|----------|
+| `SKIP_CONFIRM=yes` | Skip all prompts (non-interactive mode). | |
+| `USE_DEFAULT=yes` | Ignore existing `user.env` and use defaults. | `USE_DEFAULT=yes SKIP_CONFIRM=yes ./install-frappe-apps.sh` |
+| `NEW_USER_ENV=create` | Automatically generate a new `user.env` from template (if none exists). | `NEW_USER_ENV=create SKIP_CONFIRM=yes ./install-frappe-apps.sh` |
+
+---
+
+> 💡 *Tip:* Your `user.env` defines project-specific variables such as `EMAIL`, `DB_PASSWORD`, `BENCH`, and `SITES`.  
+> You can safely keep multiple `user.env` files in different directories to manage different Frappe installations.
+
+---
+
 ### ⚙️ Upgrade and Version Management
 
 Starting from this release, `install-frappe-apps.sh` automatically detects existing deployments and handles upgrades safely.
