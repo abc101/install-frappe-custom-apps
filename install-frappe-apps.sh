@@ -233,7 +233,7 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
     else
       echo "❌ Package manager not supported. Please install jq manually."
       exit 1
-    end
+    fi
     echo "✅ jq installed: $(jq --version)"
   fi
 
