@@ -12,12 +12,12 @@ set -euo pipefail
 # Load user.env from the same folder as this script (if present).
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -f "$SCRIPT_DIR/user.env" ]; then
-  echo "ℹ️  Loading user configuration from $SCRIPT_DIR/user.env"
+  echo "ℹ️ Loading user configuration from $SCRIPT_DIR/user.env"
   set -o allexport
   . "$SCRIPT_DIR/user.env"
   set +o allexport
 else
-  echo "➡️  No user environment file found. System will use default settings."
+  echo "➡️ No user environment file found. System will use default settings."
 fi
 
 # Read apps.json (same directory) and encode to base64
@@ -37,12 +37,12 @@ CFG="${CFG:-$HOME/gitops/$BENCH.yaml}"
 DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 mkdir -p "$DOCKER_CONFIG/cli-plugins"
 if ! docker compose version >/dev/null 2>&1; then
-  echo "ℹ️  Installing docker compose plugin ..."
+  echo "ℹ️ Installing docker compose plugin ..."
   curl -sSL https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64 \
     -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
   chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
 else
-  echo "✅  docker compose plugin is already installed."
+  echo "✅ docker compose plugin is already installed."
 fi
 
 # ----- Clone or update frappe_docker -----
@@ -212,7 +212,7 @@ docker compose \
 if [ "$INSTALL_MODE" = "fresh" ]; then
   # Fresh reinstall: stop & remove everything, including volumes (if any)
   if [ "$has_existing" = "yes" ]; then
-    echo "⚠️  Fresh reinstall: bringing down previous stack (containers + volumes)"
+    echo "⚠️ Fresh reinstall: bringing down previous stack (containers + volumes)"
     docker compose -p "$BENCH" -f "$CFG" down -v || true
   fi
 
@@ -252,10 +252,10 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
   wait_service db || { echo "❌  MariaDB not ready"; exit 1; }
   wait_service redis-cache || true
   wait_service backend || true
-  echo "✅  All background systems are ready."
+  echo "✅ All background systems are ready."
 
   # Create site (only for fresh install)
-  echo "ℹ️  Creating site and installing ERPNext..."
+  echo "ℹ️ Creating site and installing ERPNext..."
   docker compose --project-name "$BENCH" -f "$CFG" exec -T backend bash -lc \
     "export MYSQL_PWD=\"$DB_PASSWORD\"; \
      bench new-site \
@@ -268,7 +268,7 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
   # Install additional apps (if any)
   APPS=${APPS:-"hrms payments"}
   for app in $APPS; do
-    echo "ℹ️  Installing app: $app"
+    echo "ℹ️ Installing app: $app"
     docker compose --project-name "$BENCH" -f "$CFG" exec -T backend bash -lc \
       "bench --site \"$SITES\" install-app $app"
   done
@@ -278,7 +278,7 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
 
 else
   # Upgrade path (data preserved)
-  echo "🛠  Proceeding with in-place UPGRADE (data preserved)."
+  echo "🛠 Proceeding with in-place UPGRADE (data preserved)."
 
   # Optional backup
   BACKUP_STAMP="$(date +%Y%m%d-%H%M%S)"
@@ -301,10 +301,10 @@ else
     docker cp "$BACKEND_CID:$IN_BACKUP_DIR/." "$HOST_BACKUP_DIR" 2>/dev/null || true
   fi
 
-  echo "⬇️  Pulling latest images (if tags changed) ..."
+  echo "⬇️ Pulling latest images (if tags changed) ..."
   docker compose -p "$BENCH" -f "$CFG" pull || true
 
-  echo "♻️  Recreating containers ..."
+  echo "♻️ Recreating containers ..."
   docker compose -p "$BENCH" -f "$CFG" up -d
 
   echo "🧭 Running database migrations ..."
