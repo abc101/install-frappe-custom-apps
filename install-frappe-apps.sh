@@ -164,7 +164,7 @@ echo "🎯 Target ERPNext tag: ${IMAGE_TAG}"
 
 # ----- Ensure required CUSTOM_IMAGE:<IMAGE_TAG> exists on GHCR -----
 REQUIRED_IMAGE="${CUSTOM_IMAGE}:${IMAGE_TAG}"
-echo "🔎 Checking required image: ${REQUIRED_IMAGE}"
+echo "🔎  Checking required image: ${REQUIRED_IMAGE}"
 if ! docker manifest inspect "${REQUIRED_IMAGE}" >/dev/null 2>&1; then
   echo "❌  Required image not found in registry: ${REQUIRED_IMAGE}"
   echo "    Make sure docker-builder-frappe-apps.sh pushed this tag, then rerun."
@@ -225,10 +225,10 @@ if [ "$has_existing" = "yes" ] && [ "${_install_mode}" != "fresh" ] && [ -n "$CU
     if [ "${FORCE_UPGRADE:-}" = "yes" ]; then
       echo "⚠️  Target ($IMAGE_TAG) is not newer than current ($CURRENT_VERSION), but FORCE_UPGRADE=yes — continuing."
     else
-      echo "ℹ️ Target ($IMAGE_TAG) is not newer than current ($CURRENT_VERSION)."
-      echo "   Skipping upgrade to avoid unnecessary changes."
-      echo "   - To force a redeploy: export FORCE_UPGRADE=yes"
-      echo "   - To reinstall from scratch (DESTROYS DATA): export INSTALL_MODE=fresh"
+      echo "ℹ️  Target ($IMAGE_TAG) is not newer than current ($CURRENT_VERSION)."
+      echo "    Skipping upgrade to avoid unnecessary changes."
+      echo "    - To force a redeploy: export FORCE_UPGRADE=yes"
+      echo "    - To reinstall from scratch (DESTROYS DATA): export INSTALL_MODE=fresh"
       exit 0
     fi
   fi
