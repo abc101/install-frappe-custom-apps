@@ -48,7 +48,7 @@ fi
 # ----- Clone or update frappe_docker -----
 cd "$HOME"
 if [ -d frappe_docker ]; then
-  echo "📦 frappe_docker exists — updating..."
+  echo "📦  frappe_docker exists — updating..."
   (
     cd frappe_docker
     git fetch --all --prune
@@ -56,7 +56,7 @@ if [ -d frappe_docker ]; then
     git pull --rebase
   )
 else
-  echo "📥 Cloning frappe_docker..."
+  echo "📥  Cloning frappe_docker..."
   git clone https://github.com/frappe/frappe_docker
 fi
 cd "$HOME/frappe_docker"
@@ -85,11 +85,11 @@ echo "🎯 Target ERPNext tag: ${IMAGE_TAG}"
 REQUIRED_IMAGE="${CUSTOM_IMAGE}:${IMAGE_TAG}"
 echo "🔎 Checking required image: ${REQUIRED_IMAGE}"
 if ! docker manifest inspect "${REQUIRED_IMAGE}" >/dev/null 2>&1; then
-  echo "❌ Required image not found in registry: ${REQUIRED_IMAGE}"
-  echo "   Make sure docker-builder-frappe-apps.sh pushed this tag, then rerun."
+  echo "❌  Required image not found in registry: ${REQUIRED_IMAGE}"
+  echo "    Make sure docker-builder-frappe-apps.sh pushed this tag, then rerun."
   exit 1
 fi
-echo "✅ Found required image: ${REQUIRED_IMAGE}"
+echo "✅  Found required image: ${REQUIRED_IMAGE}"
 
 # ===== Version Gate (compare CURRENT vs TARGET) =====
 _norm_ver() { echo "$1" | sed -E 's/^[vV]//; s/[^0-9.].*$//'; }
@@ -115,7 +115,7 @@ get_current_version() {
   if [ -f "$CFG" ] && docker compose -p "$BENCH" -f "$CFG" ps -q backend >/dev/null 2>&1 && \
      [ -n "$(docker compose -p "$BENCH" -f "$CFG" ps -q backend)" ]; then
     docker compose -p "$BENCH" -f "$CFG" exec -T backend \
-      bash -lc 'bench version 2>/dev/null | awk '"'"'/^erpnext[[:space:]]/{print $2; exit}'"'"  || true"
+      bash -lc 'bench version 2>/dev/null | awk '"'"'/^erpnext[[:space:]]/{print $2; exit}'"'"  || true""
   else
     echo ""
   fi
