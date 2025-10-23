@@ -12,12 +12,12 @@ set -euo pipefail
 # Load user.env from the same folder as this script (if present).
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ -f "$SCRIPT_DIR/user.env" ]; then
-  echo "ℹ️ Loading user configuration from $SCRIPT_DIR/user.env"
+  echo "ℹ️  Loading user configuration from $SCRIPT_DIR/user.env"
   set -o allexport
   . "$SCRIPT_DIR/user.env"
   set +o allexport
 else
-  echo "➡️ No user environment file found. System will use default settings."
+  echo "➡️  No user environment file found. System will use default settings."
 fi
 
 # Read apps.json (same directory) and encode to base64
@@ -37,12 +37,12 @@ CFG="${CFG:-$HOME/gitops/$BENCH.yaml}"
 DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 mkdir -p "$DOCKER_CONFIG/cli-plugins"
 if ! docker compose version >/dev/null 2>&1; then
-  echo "ℹ️ Installing docker compose plugin ..."
+  echo "ℹ️  Installing docker compose plugin ..."
   curl -sSL https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64 \
     -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
   chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
 else
-  echo "✅ docker compose plugin is already installed."
+  echo "✅  docker compose plugin is already installed."
 fi
 
 # ----- Clone or update frappe_docker -----
@@ -76,7 +76,7 @@ if [ -z "${IMAGE_TAG:-}" ] && [ -n "${FRAPPE_ERPNEXT_VERSION:-}" ]; then
 fi
 
 if [ -z "${IMAGE_TAG:-}" ]; then
-  echo "❌ Could not determine ERPNext image tag. Set FRAPPE_ERPNEXT_VERSION or define frappe/erpnext:<tag> in pwd.yml."
+  echo "❌  Could not determine ERPNext image tag. Set FRAPPE_ERPNEXT_VERSION or define frappe/erpnext:<tag> in pwd.yml."
   exit 1
 fi
 echo "🎯 Target ERPNext tag: ${IMAGE_TAG}"
@@ -130,19 +130,19 @@ if [ -z "$CURRENT_VERSION" ] && [ "$has_existing" = "yes" ]; then
 fi
 
 if [ -n "$CURRENT_VERSION" ]; then
-  echo "📦 Current ERPNext version: ${CURRENT_VERSION}"
+  echo "📦  Current ERPNext version: ${CURRENT_VERSION}"
 else
-  echo "📦 No installed ERPNext version detected."
+  echo "📦  No installed ERPNext version detected."
 fi
 
 # If something exists and we're not forcing a fresh reinstall, gate on version
 _install_mode="${INSTALL_MODE:-}"   # may be set later by selection prompt
 if [ "$has_existing" = "yes" ] && [ "${_install_mode}" != "fresh" ] && [ -n "$CURRENT_VERSION" ]; then
   if is_newer "$IMAGE_TAG" "$CURRENT_VERSION"; then
-    echo "✅ Target version is newer — upgrade can proceed."
+    echo "✅  Target version is newer — upgrade can proceed."
   else
     if [ "${FORCE_UPGRADE:-}" = "yes" ]; then
-      echo "⚠️ Target ($IMAGE_TAG) is not newer than current ($CURRENT_VERSION), but FORCE_UPGRADE=yes — continuing."
+      echo "⚠️  Target ($IMAGE_TAG) is not newer than current ($CURRENT_VERSION), but FORCE_UPGRADE=yes — continuing."
     else
       echo "ℹ️ Target ($IMAGE_TAG) is not newer than current ($CURRENT_VERSION)."
       echo "   Skipping upgrade to avoid unnecessary changes."
@@ -212,7 +212,7 @@ docker compose \
 if [ "$INSTALL_MODE" = "fresh" ]; then
   # Fresh reinstall: stop & remove everything, including volumes (if any)
   if [ "$has_existing" = "yes" ]; then
-    echo "⚠️ Fresh reinstall: bringing down previous stack (containers + volumes)"
+    echo "⚠️  Fresh reinstall: bringing down previous stack (containers + volumes)"
     docker compose -p "$BENCH" -f "$CFG" down -v || true
   fi
 
@@ -231,7 +231,7 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
     elif command -v apk >/dev/null 2>&1; then
       sudo apk add --no-cache jq
     else
-      echo "❌ Package manager not supported. Please install jq manually."
+      echo "❌  Package manager not supported. Please install jq manually."
       exit 1
     fi
     echo "✅ jq installed: $(jq --version)"
@@ -252,10 +252,10 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
   wait_service db || { echo "❌  MariaDB not ready"; exit 1; }
   wait_service redis-cache || true
   wait_service backend || true
-  echo "✅ All background systems are ready."
+  echo "✅  All background systems are ready."
 
   # Create site (only for fresh install)
-  echo "ℹ️ Creating site and installing ERPNext..."
+  echo "ℹ️  Creating site and installing ERPNext..."
   docker compose --project-name "$BENCH" -f "$CFG" exec -T backend bash -lc \
     "export MYSQL_PWD=\"$DB_PASSWORD\"; \
      bench new-site \
@@ -268,13 +268,13 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
   # Install additional apps (if any)
   APPS=${APPS:-"hrms payments"}
   for app in $APPS; do
-    echo "ℹ️ Installing app: $app"
+    echo "ℹ️  Installing app: $app"
     docker compose --project-name "$BENCH" -f "$CFG" exec -T backend bash -lc \
       "bench --site \"$SITES\" install-app $app"
   done
 
   echo
-  echo "✅ Fresh installation complete."
+  echo "✅  Fresh installation complete."
 
 else
   # Upgrade path (data preserved)
@@ -289,7 +289,7 @@ else
   docker compose -p "$BENCH" -f "$CFG" exec -T backend \
     bash -lc 'bench --site "'"$SITES"'" set-maintenance-mode on' || true
 
-  echo "💾 Creating on-site backup (DB + files)..."
+  echo "💾  Creating on-site backup (DB + files)..."
   docker compose -p "$BENCH" -f "$CFG" exec -T backend \
     bash -lc 'bench --site "'"$SITES"'" backup --with-files' || true
 
@@ -297,33 +297,33 @@ else
   BACKEND_CID="$(docker compose -p "$BENCH" -f "$CFG" ps -q backend || true)"
   if [ -n "$BACKEND_CID" ]; then
     IN_BACKUP_DIR="/home/frappe/frappe-bench/sites/$SITES/private/backups"
-    echo "📤 Copying backups to host: $HOST_BACKUP_DIR"
+    echo "📤  Copying backups to host: $HOST_BACKUP_DIR"
     docker cp "$BACKEND_CID:$IN_BACKUP_DIR/." "$HOST_BACKUP_DIR" 2>/dev/null || true
   fi
 
-  echo "⬇️ Pulling latest images (if tags changed) ..."
+  echo "⬇️  Pulling latest images (if tags changed) ..."
   docker compose -p "$BENCH" -f "$CFG" pull || true
 
-  echo "♻️ Recreating containers ..."
+  echo "♻️  Recreating containers ..."
   docker compose -p "$BENCH" -f "$CFG" up -d
 
-  echo "🧭 Running database migrations ..."
+  echo "🧭  Running database migrations ..."
   docker compose -p "$BENCH" -f "$CFG" exec -T backend \
     bash -lc 'bench --site "'"$SITES"'" migrate'
 
-  echo "🧱 Rebuilding production assets (frontend) ..."
+  echo "🧱  Rebuilding production assets (frontend) ..."
   docker compose -p "$BENCH" -f "$CFG" exec -T frontend \
     bash -lc 'export NODE_OPTIONS="--max_old_space_size=2048"; bench build --production' || true
 
-  echo "🔁 Restarting core services ..."
+  echo "🔁  Restarting core services ..."
   docker compose -p "$BENCH" -f "$CFG" restart frontend backend websocket queue-short queue-long scheduler || true
 
-  echo "🔓 Disabling maintenance mode ..."
+  echo "🔓  Disabling maintenance mode ..."
   docker compose -p "$BENCH" -f "$CFG" exec -T backend \
     bash -lc 'bench --site "'"$SITES"'" set-maintenance-mode off' || true
 
   echo
-  echo "✅ Upgrade complete. Backups saved in: $HOST_BACKUP_DIR"
+  echo "✅  Upgrade complete. Backups saved in: $HOST_BACKUP_DIR"
 fi
 
 # ----- Final info -----
