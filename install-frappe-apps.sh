@@ -160,7 +160,7 @@ if [ -z "${IMAGE_TAG:-}" ]; then
   echo "❌  Could not determine ERPNext image tag. Set FRAPPE_ERPNEXT_VERSION or define frappe/erpnext:<tag> in pwd.yml."
   exit 1
 fi
-echo "🎯 Target ERPNext tag: ${IMAGE_TAG}"
+echo "🎯  Target ERPNext tag: ${IMAGE_TAG}"
 
 # ----- Ensure required CUSTOM_IMAGE:<IMAGE_TAG> exists on GHCR -----
 REQUIRED_IMAGE="${CUSTOM_IMAGE}:${IMAGE_TAG}"
