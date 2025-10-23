@@ -170,7 +170,7 @@ if [ "$has_existing" = "yes" ]; then
 else
   INSTALL_MODE="fresh"  # nothing exists → fresh install
 fi
-echo "🧭 Selected mode: ${INSTALL_MODE}"
+echo "🧭  Selected mode: ${INSTALL_MODE}"
 
 # ===== Prepare gitops files (only delete on fresh) =====
 if [ "$INSTALL_MODE" = "fresh" ]; then
@@ -216,7 +216,7 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
     docker compose -p "$BENCH" -f "$CFG" down -v || true
   fi
 
-  echo "🚀 Starting a fresh installation..."
+  echo "🚀  Starting a fresh installation..."
   docker compose --project-name "$BENCH" -f "$CFG" up -d
 
   # jq requirement (for wait helper)
@@ -234,7 +234,7 @@ if [ "$INSTALL_MODE" = "fresh" ]; then
       echo "❌  Package manager not supported. Please install jq manually."
       exit 1
     fi
-    echo "✅ jq installed: $(jq --version)"
+    echo "✅  jq installed: $(jq --version)"
   fi
 
   # Wait for core services
@@ -285,7 +285,7 @@ else
   HOST_BACKUP_DIR="${HOST_BACKUP_DIR:-$PWD/backups/$BENCH-$BACKUP_STAMP}"
   mkdir -p "$HOST_BACKUP_DIR"
 
-  echo "🔒 Enabling maintenance mode..."
+  echo "🔒  Enabling maintenance mode..."
   docker compose -p "$BENCH" -f "$CFG" exec -T backend \
     bash -lc 'bench --site "'"$SITES"'" set-maintenance-mode on' || true
 
